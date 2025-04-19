@@ -1,0 +1,13 @@
+# Mac
+*.DS_Store
+
+# Python
+*.pyc
+__pycache__/
+
+# Project
+.env
+src/instance/
+backups/
+venv/
+
