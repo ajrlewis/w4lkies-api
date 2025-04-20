@@ -25,13 +25,9 @@ user_router = APIRouter(prefix="/users", tags=["Users"])
 # user_id: Annotated[Union[int, None], Query(description="The user ID to fetch..")],
 # response_model=user_schema.User
 @user_router.get("/")
-async def read_users(db: GetDBDep):
-    users = user_crud.get_users(db, user_id)
-    logger.debug(f"{db_user = }")
-    if db_user:
-        return db_user
-    else:
-        raise HTTPException(status_code=404, detail="user not added")
+async def read_users(db: GetDBDep, current_user: GetCurrentUserDep):
+    users = user_crud.get_users(db)
+    return users
 
 
 # @app.get("/me/", response_model=User)

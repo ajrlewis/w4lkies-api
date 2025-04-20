@@ -10,7 +10,7 @@ from dependencies import GetDBDep, GetCurrentUserDep
 from services import customer_service
 
 
-customer_router = APIRouter(prefix="/customer", tags=["Customer"])
+customer_router = APIRouter(prefix="/customers", tags=["Customer"])
 
 
 @customer_router.get("/")

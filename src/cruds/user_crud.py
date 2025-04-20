@@ -8,5 +8,9 @@ from database import SessionLocal
 from models import User
 
 
+def get_users(db: SessionLocal) -> list[User]:
+    return db.query(User).all()
+
+
 def get_user_by_name(db: SessionLocal, name: str) -> Optional[User]:
     return db.query(User).filter_by(name=name).first()

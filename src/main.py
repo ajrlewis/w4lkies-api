@@ -3,7 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from config import settings
-from routers import auth_router, user_router, customer_router
+from routers import (
+    auth_router,
+    user_router,
+    customer_router,
+    vet_router,
+    dog_router,
+    service_router,
+    booking_router,
+    invoice_router,
+    expense_router,
+)
 
 logger.debug("Creating application ...")
 app = FastAPI(
@@ -39,6 +49,12 @@ logger.debug("Including routes ...")
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(customer_router)
+app.include_router(vet_router)
+app.include_router(dog_router)
+app.include_router(service_router)
+app.include_router(booking_router)
+app.include_router(invoice_router)
+app.include_router(expense_router)
 
 import time
 from fastapi import Request
