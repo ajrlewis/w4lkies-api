@@ -7,7 +7,6 @@ from cruds import customer_crud
 from dependencies import GetDBDep, GetCurrentUserDep
 
 # from schemas.customer_schema import CustomerSchema
-from services import customer_service
 
 
 customer_router = APIRouter(prefix="/customers", tags=["Customer"])
