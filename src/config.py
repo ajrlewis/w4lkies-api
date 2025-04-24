@@ -15,5 +15,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
 
+    MAIL_SERVER: str = os.getenv("MAIL_SERVER", "")
+    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "")
+    MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD", "")
+    MAIL_DEFAULT_SENDER_NAME: str = os.getenv("MAIL_DEFAULT_SENDER_NAME", "")
+
 
 settings = Settings()

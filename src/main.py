@@ -56,6 +56,15 @@ app.include_router(booking_router)
 app.include_router(invoice_router)
 app.include_router(expense_router)
 
+
+from routers import contact_us_router
+
+app.include_router(contact_us_router)
+
+
+# from fastapi.staticfiles import StaticFiles
+# app.mount("/static", StaticFiles(directory="src/static"), name="static")
+
 import time
 from fastapi import Request
 
