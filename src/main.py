@@ -83,10 +83,10 @@ async def add_process_time_header(request: Request, call_next):
 
 @app.middleware("http")
 async def add_request_info(request: Request, call_next):
-    origin = request.headers.get("origin")
-    logger.debug(f"{origin = } {allow_origins = }")
-    logger.debug(f"Request URL: {request.url}")
-    logger.debug(f"Request method: {request.method}")
-    logger.debug(f"Request headers: {request.headers}")
+    # origin = request.headers.get("origin")
+    # logger.debug(f"{origin = } {allow_origins = }")
+    # logger.debug(f"Request URL: {request.url}")
+    # logger.debug(f"Request method: {request.method}")
+    # logger.debug(f"Request headers: {request.headers}")
     response = await call_next(request)
     return response
