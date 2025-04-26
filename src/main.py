@@ -37,9 +37,11 @@ app = FastAPI(
 
 
 logger.debug("Adding CORS middleware ...")
+allow_origins = settings.ALLOW_ORIGINS.split(",")
+logger.debug(f"{allow_origins = }")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOW_ORIGINS.split(","),
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -63,7 +65,7 @@ app.include_router(contact_us_router)
 
 
 @app.get("/")
-async def main():
+async def read_root():
     return {"message": "Hello World"}
 
 
@@ -77,4 +79,13 @@ async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
     process_time = time.perf_counter() - start_time
     response.headers["X-Process-Time"] = str(process_time)
+    return response
+
+
+@app.middleware("http")
+async def add_request_info(request: Request, call_next):
+    logger.debug(f"Request URL: {request.url}")
+    logger.debug(f"Request method: {request.method}")
+    logger.debug(f"Request headers: {request.headers}")
+    response = await call_next(request)
     return response
