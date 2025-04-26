@@ -39,7 +39,7 @@ app = FastAPI(
 logger.debug("Adding CORS middleware ...")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOW_ORIGINS.split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,8 +62,10 @@ from routers import contact_us_router
 app.include_router(contact_us_router)
 
 
-# from fastapi.staticfiles import StaticFiles
-# app.mount("/static", StaticFiles(directory="src/static"), name="static")
+@app.get("/")
+async def main():
+    return {"message": "Hello World"}
+
 
 import time
 from fastapi import Request
