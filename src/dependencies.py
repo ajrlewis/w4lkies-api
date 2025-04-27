@@ -62,7 +62,7 @@ async def get_current_user(db: GetDBDep, token: GetTokenDep):
 GetCurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 
-async def get_current_active_user(current_user: Annotated[User, GetCurrentUserDep]):
+async def get_current_active_user(current_user: GetCurrentUserDep):
     if current_user.is_active:
         return current_user
     else:
@@ -74,11 +74,13 @@ async def get_current_active_user(current_user: Annotated[User, GetCurrentUserDe
 GetCurrentActiveUserDep = Annotated[User, Depends(get_current_active_user)]
 
 
-# async def get_current_admin_user(current_user: Annotated[User, GetCurrentUserDep]):
-#     if current_user.is_admin:
-#         return current_user
-#     else:
-#         raise HTTPException(status_code=400, detail="Inactive user")
+async def get_current_admin_user(current_user: GetCurrentActiveUserDep):
+    if current_user.is_admin:
+        return current_user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions"
+        )
 
 
-# GetCurrentAdminUserDep = Annotated[User, Depends(get_current_admin_user)]
+GetCurrentAdminUserDep = Annotated[User, Depends(get_current_admin_user)]

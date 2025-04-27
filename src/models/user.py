@@ -13,3 +13,4 @@ class User(TimestampMixin, Base):
     email = Column(String)
     password_hash = Column(String)
     is_admin = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=False)
