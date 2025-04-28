@@ -1,14 +1,87 @@
 from typing import Optional
 
 from loguru import logger
+from sqlalchemy import distinct
+from sqlalchemy.exc import SQLAlchemyError
 
 from database import SessionLocal
-from models import Dog
+from exceptions import NotFoundError, DatabaseError
+from models import User, Dog
+from schemas.dog_schema import DogUpdateSchema, DogCreateSchema
 
 
 def get_dogs(db: SessionLocal) -> list[Dog]:
-    return db.query(Dog).all()
+    query = db.query(Dog)
+    query = query.order_by(Dog.name)
+    dogs = query.all()
+    return dogs
 
 
-def get_dog_by_id(db: SessionLocal, dog_id: int) -> Optional[Dog]:
-    return db.query.get(Dog, dog_id)
+def get_dog_breeds(db: SessionLocal) -> list[str]:
+    logger.debug("here")
+    query = db.query(distinct(Dog.breed))
+    query = query.order_by(Dog.breed)
+    dog_breeds = query.all()
+    logger.debug(f"{dog_breeds = }")
+    dog_breeds = [breed[0] for breed in dog_breeds]
+    logger.debug(f"{dog_breeds = }")
+    return dog_breeds
+
+
+def get_dog_by_id(db: SessionLocal, dog_id: int) -> Dog:
+    dog = db.get(Dog, dog_id)
+    if not dog:
+        raise NotFoundError(f"Dog {dog_id} not found")
+    return dog
+
+
+def update_dog_by_id(
+    db: SessionLocal, current_user: User, dog_id: int, dog_data: DogUpdateSchema
+) -> Dog:
+    logger.debug(f"{current_user = } {dog_data = }")
+    dog = get_dog_by_id(db, dog_id)
+    if not dog:
+        raise NotFoundError(f"Dog {dog_id} not found")
+
+    if name := dog_data.name:
+        dog.name = name
+    if phone := dog_data.phone:
+        dog.phone = phone
+    if address := dog_data.address:
+        dog.address = address
+
+    try:
+        dog.updated_by = current_user.user_id
+        db.commit()
+        return dog
+    except SQLAlchemyError as e:
+        detail = f"Error updating dog: {e}"
+        logger.error(detail)
+        db.rollback()
+        raise DatabaseError("An error occurred while updating the dog.")
+
+
+def add_dog(db: SessionLocal, current_user: User, dog_data: DogCreateSchema) -> Dog:
+    logger.debug(f"{dog_data = }")
+    dog = Dog(name=dog_data.name, address=dog_data.address, phone=dog_data.phone)
+    try:
+        dog.created_by = current_user.user_id
+        db.add(dog)
+        db.commit()
+        return dog
+    except SQLAlchemyError as e:
+        detail = f"Error adding dog: {e}"
+        logger.error(detail)
+        db.rollback()
+        raise DatabaseError("An error occurred while adding a dog.")
+
+
+def delete_dog_by_id(db: SessionLocal, dog_id: int):
+    dog = get_dog_by_id(db, dog_id)
+    if not dog:
+        raise NotFoundError(f"Dog {dog_id} not found")
+    try:
+        db.delete(dog)
+        db.commit()
+    except Exception as e:
+        raise DatabaseError("An error occurred while deleting the dog.")
