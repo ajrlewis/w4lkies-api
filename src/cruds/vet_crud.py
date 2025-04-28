@@ -10,7 +10,10 @@ from schemas.vet_schema import VetUpdateSchema, VetCreateSchema
 
 
 def get_vets(db: SessionLocal) -> list[Vet]:
-    return db.query(Vet).all()
+    query = db.query(Vet)
+    query = query.order_by(Vet.name)
+    vets = query.all()
+    return vets
 
 
 def get_vet_by_id(db: SessionLocal, vet_id: int) -> Vet:
