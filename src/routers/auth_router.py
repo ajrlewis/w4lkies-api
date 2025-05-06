@@ -43,8 +43,7 @@ async def login_for_access_token(
         background_tasks.add_task(
             send_email,
             to=[user.email],
-            bcc=[settings.MAIL_USERNAME],
-            subject="🔔📩 Sign-in Notification 📩🔔",
+            subject="⚠️❗ W4lkies Sign In ❗⚠️",
             content=content,
         )
         logger.debug("User sign-in notification sent in the background")
