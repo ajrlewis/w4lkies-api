@@ -18,7 +18,6 @@ def get_dogs(db: SessionLocal) -> list[Dog]:
 
 
 def get_dog_breeds(db: SessionLocal) -> list[str]:
-    logger.debug("here")
     query = db.query(distinct(Dog.breed))
     query = query.order_by(Dog.breed)
     results = query.all()

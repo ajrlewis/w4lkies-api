@@ -26,7 +26,6 @@ def get_vet_by_id(db: SessionLocal, vet_id: int) -> Vet:
 def update_vet_by_id(
     db: SessionLocal, current_user: User, vet_id: int, vet_data: VetUpdateSchema
 ) -> Vet:
-    logger.debug(f"{current_user = } {vet_data = }")
     vet = get_vet_by_id(db, vet_id)
     if not vet:
         raise NotFoundError(f"Vet {vet_id} not found")
