@@ -1,32 +1,3 @@
-"""
-{
-    "customer": {
-        "name": "adfd",
-        "email": "hello@ajrlewis.com",
-        "phone": "07775652277",
-        "emergency_contact_name": "adfad",
-        "emergency_contact_phone": "07775652277",
-    },
-    "dogs": [
-        {
-            "name": "foo bar",
-            "breed": "Jack Russell x Chihuahua",
-            "date_of_birth": "2025-05-09",
-            "behavioral_issues": "",
-            "medical_needs": "",
-            "is_allowed_treats": false,
-            "is_allowed_off_the_lead": false,
-            "is_allowed_on_social_media": true,
-            "is_neutered_or_spayed": false,
-            "vet_name": "King Street Vets (Twickenham)",
-            "vet_address": "38 King St, Twickenham TW1 3SL",
-        }
-    ],
-    "declaration": true,
-}
-"""
-
-
 from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, Request, status
 from loguru import logger
 
@@ -62,11 +33,11 @@ async def submit_customer_sign_up(
             send_email,
             to=[customer.email],
             bcc=[settings.MAIL_USERNAME],
-            subject="🎉🌟 New Customer Sign Up 🌟🎉",
+            subject="🎉🐾 W4lkies Customer Sign Up 🐾🎉",
             content=content,
         )
 
-        return {"message": "Customer signup notification sent in the background"}
+        return {"message": "Customer sign-up notification sent in the background"}
 
     except Exception as e:
         logger.error(f"Error processing customer signup form: {e}")
