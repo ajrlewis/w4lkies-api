@@ -13,6 +13,7 @@ class CustomerBaseSchema(BaseModel):
 
 class CustomerCreateSchema(CustomerBaseSchema):
     signed_up_on: datetime
+    is_active: bool = True
 
 
 class CustomerUpdateSchema(BaseModel):

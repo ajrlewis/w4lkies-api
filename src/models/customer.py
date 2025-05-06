@@ -12,6 +12,7 @@ class Customer(TimestampMixin, Base):
     customer_id = Column(Integer, primary_key=True)
     name = Column(String)
     phone = Column(String)
+    email = Column(String)
     emergency_contact_name = Column(String)
     emergency_contact_phone = Column(String)
     signed_up_on = Column(DateTime)
