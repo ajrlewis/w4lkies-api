@@ -33,7 +33,7 @@ async def submit_contact_form(
             send_email,
             to=[contact_us_message.email],
             bcc=[settings.MAIL_USERNAME],
-            subject="🔔📩 New Contact Us Notification 📩🔔",
+            subject="🐶📩 W4lkies Contact Us 📩🐶",
             content=content,
         )
 
