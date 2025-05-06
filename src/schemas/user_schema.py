@@ -1,19 +1,28 @@
+from typing import List, Optional, Union
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
-class UserBase(BaseModel):
+class UserBaseSchema(BaseModel):
     username: str
     email: str
 
 
-class UserCreate(UserBase):
+class UserCreateSchema(UserBaseSchema):
     password: str
 
 
-class User(UserBase):
+class UserUpdateSchema(BaseModel):
+    username: Union[str, None] = None
+    email: Union[str, None] = None
+    phone: Union[str, None] = None
+
+
+class UserSchema(UserBaseSchema):
     user_id: int
-    password_hash: str
-    is_admin: bool
+    is_admin: int
+    is_active: int
 
     class Config:
         from_attributes = True

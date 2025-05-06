@@ -9,21 +9,7 @@ from schemas.dog_schema import DogSchema, DogUpdateSchema, DogCreateSchema
 dog_router = APIRouter(prefix="/dogs", tags=["Dogs"])
 
 
-@dog_router.get("/{dog_id}", response_model=DogSchema)
-async def read_dog(db: GetDBDep, dog_id: int) -> DogSchema:
-    """Reads and returns a specific dog from the database."""
-    try:
-        dog = dog_crud.get_dog_by_id(db, dog_id)
-        return dog
-    except NotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except DatabaseError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )
-
-
-@dog_router.get("/breeds/", response_model=list[str])
+@dog_router.get("/breeds", response_model=list[str])
 async def read_dog_breeds(db: GetDBDep) -> list[str]:
     """Reads and returns all dog breeds from the database."""
     try:

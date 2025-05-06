@@ -14,3 +14,7 @@ class User(TimestampMixin, Base):
     password_hash = Column(String)
     is_admin = Column(Boolean, default=False)
     is_active = Column(Boolean, default=False)
+
+    @property
+    def username(self) -> str:
+        return self.name
