@@ -58,9 +58,10 @@ app.include_router(invoice_router)
 app.include_router(expense_router)
 
 
-from routers import contact_us_router
+from routers import contact_us_router, customer_sign_up_router
 
 app.include_router(contact_us_router)
+app.include_router(customer_sign_up_router)
 
 
 @app.get("/")

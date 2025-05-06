@@ -1,63 +1,47 @@
-# emails.py
-
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
-
-def send_email(to: str, subject: str, content: str):
-    msg = MIMEMultipart()
-    msg["From"] = f"{settings.MAIL_DEFAULT_SENDER_NAME} <{settings.MAIL_USERNAME}>"
-    msg["To"] = to
-    msg["Subject"] = subject
-    msg.attach(MIMEText(content, "html"))
-    try:
-        server = smtplib.SMTP(settings.MAIL_SERVER, 587)
-        server.starttls()
-        server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
-        server.sendmail(msg["From"], msg["To"], msg.as_string())
-        server.quit()
-        logger.debug("Email sent successfully")
-    except Exception as e:
-        logger.error(f"Failed to send email: {e}")
-
-
-# contact_us_router.py
-
-
 from typing import Annotated, Union
 
-from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, status
-from fastapi import Request
-from fastapi.templating import Jinja2Templates
+from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, status, Request
 from loguru import logger
 
-from dependencies import GetDBDep, GetCurrentUserDep
 from config import settings
+from dependencies import GetDBDep, GetCurrentUserDep
+from emails import send_email
+from schemas.contact_us_schema import ContactUsSchema
+from templates import render_template
 
-templates = Jinja2Templates(directory="src/templates")
 
 contact_us_router = APIRouter(prefix="/contact_us", tags=["Contact Us"])
 
 
 @contact_us_router.post("/")
 async def submit_contact_form(
-    name: str = Form(...),
-    email: str = Form(...),
-    message: str = Form(...),
-    background_tasks: BackgroundTasks = BackgroundTasks(),
-    request: Request = Request,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    contact_us_message: ContactUsSchema,
 ):
-    logger.debug(f"{name = } {email = } {message = }")
-    content = templates.TemplateResponse(
-        "emails/contact_us.html",
-        {"name": name, "email": email, "message": message, "request": request},
-    ).body.decode("utf-8")
-    logger.debug(f"{content = }")
-    background_tasks.add_task(
-        send_email,
-        to=settings.MAIL_USERNAME,
-        subject="New Contact Us Notification",
-        content=content,
-    )
-    return {"message": "Contact us notification sent in the background"}
+    try:
+        name = contact_us_message.name
+        email = contact_us_message.email
+        message = contact_us_message.message
+
+        content = render_template(
+            "emails/contact_us.html",
+            {"name": name, "email": email, "message": message, "request": request},
+        )
+
+        background_tasks.add_task(
+            send_email,
+            to=[contact_us_message.email],
+            bcc=[settings.MAIL_USERNAME],
+            subject="🔔📩 New Contact Us Notification 📩🔔",
+            content=content,
+        )
+
+        return {"message": "Contact us notification sent in the background"}
+
+    except Exception as e:
+        logger.error(f"Error processing contact form: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )

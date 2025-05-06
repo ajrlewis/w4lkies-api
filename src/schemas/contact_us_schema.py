@@ -1,9 +1,9 @@
 from typing import Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
-class ContactUs(BaseModel):
+class ContactUsSchema(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     message: str
