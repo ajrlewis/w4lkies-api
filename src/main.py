@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_pagination import add_pagination
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 from config import settings
@@ -36,11 +36,12 @@ app = FastAPI(
     },
 )
 
-add_pagination(app)
+
+logger.debug("Mounting static directory ...")
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 logger.debug("Adding CORS middleware ...")
 allow_origins = settings.ALLOW_ORIGINS.split(",")
-logger.debug(f"... {allow_origins = }")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
@@ -71,32 +72,4 @@ app.include_router(customer_sign_up_router)
 
 @app.get("/")
 async def read_root():
-    return {"message": "Hello World"}
-
-
-from fastapi.staticfiles import StaticFiles
-
-app.mount("/static", StaticFiles(directory="src/static"), name="static")
-
-# import time
-# from fastapi import Request
-
-
-# @app.middleware("http")
-# async def add_process_time_header(request: Request, call_next):
-#     start_time = time.perf_counter()
-#     response = await call_next(request)
-#     process_time = time.perf_counter() - start_time
-#     response.headers["X-Process-Time"] = str(process_time)
-#     return response
-
-
-# @app.middleware("http")
-# async def add_request_info(request: Request, call_next):
-#     # origin = request.headers.get("origin")
-#     # logger.debug(f"{origin = } {allow_origins = }")
-#     # logger.debug(f"Request URL: {request.url}")
-#     # logger.debug(f"Request method: {request.method}")
-#     # logger.debug(f"Request headers: {request.headers}")
-#     response = await call_next(request)
-#     return response
+    return {"message": "Hello World!"}
