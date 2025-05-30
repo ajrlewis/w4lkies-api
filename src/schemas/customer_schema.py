@@ -3,6 +3,11 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 
+class CustomerSnippetSchema(BaseModel):
+    customer_id: int
+    name: str
+
+
 class CustomerBaseSchema(BaseModel):
     name: str
     phone: str

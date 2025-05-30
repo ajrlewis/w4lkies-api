@@ -4,6 +4,11 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class UserSnippetSchema(BaseModel):
+    user_id: int
+    username: str
+
+
 class UserBaseSchema(BaseModel):
     username: str
     email: str

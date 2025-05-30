@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, BackgroundTasks, HTTPException, status
+from fastapi import Depends, BackgroundTasks, Query, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 from jwt.exceptions import InvalidTokenError
@@ -10,7 +10,20 @@ from config import settings
 from cruds import user_crud
 from database import SessionLocal
 from models import User
+from schemas.pagination_schema import PaginationParamsSchema
 from schemas.token_schema import TokenData
+
+
+def get_pagination_params(
+    page: int = Query(1, description="Page number"),
+    page_size: int = Query(20, description="Number of items per page"),
+) -> PaginationParamsSchema:
+    return PaginationParamsSchema(page=page, page_size=page_size)
+
+
+GetPaginationParamsDep = Annotated[
+    PaginationParamsSchema, Depends(get_pagination_params)
+]
 
 
 def get_db():
@@ -33,7 +46,8 @@ def get_oauth2_form_data(
 OAuth2FormDataDep = Annotated[OAuth2PasswordRequestForm, Depends(get_oauth2_form_data)]
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+scopes = {"admin": "Admin User", "user": "Normal User", "customer": "Customer User"}
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token", scopes=scopes)
 GetTokenDep = Annotated[str, Depends(oauth2_scheme)]
 
 

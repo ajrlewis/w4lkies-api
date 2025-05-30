@@ -21,4 +21,5 @@ class Dog(TimestampMixin, Base):
     breed = Column(String(255), nullable=True)
 
     customer_id = Column(Integer, ForeignKey("customer.customer_id"), nullable=False)
+
     vet_id = Column(Integer, ForeignKey("vet.vet_id"), nullable=False)

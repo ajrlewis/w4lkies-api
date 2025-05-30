@@ -3,8 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from schemas.customer_schema import CustomerBaseSchema, CustomerUpdateSchema
-from schemas.vet_schema import VetBaseSchema, VetUpdateSchema
+from schemas.customer_schema import CustomerBaseSchema
+from schemas.vet_schema import VetBaseSchema
 
 
 class DogBaseSchema(BaseModel):
@@ -17,8 +17,10 @@ class DogBaseSchema(BaseModel):
     is_neutered_or_spayed: bool
     behavioral_issues: str = ""
     medical_needs: str = ""
-    customer_id: int = 0
-    vet_id: int = 0
+    # customer_id: int = 0
+    customer: CustomerBaseSchema
+    # vet_id: int = 0
+    vet: VetBaseSchema
 
 
 class DogCreateSchema(DogBaseSchema):
@@ -35,8 +37,8 @@ class DogUpdateSchema(BaseModel):
     is_neutered_or_spayed: Union[bool, None] = None
     behavioral_issues: Union[str, None] = None
     medical_needs: Union[str, None] = None
-    customer: Union[CustomerUpdateSchema, None] = None
-    vet: Union[VetUpdateSchema, None] = None
+    customer_id: Union[int, None] = None
+    vet_id: Union[int, None] = None
 
 
 class DogSchema(DogBaseSchema):

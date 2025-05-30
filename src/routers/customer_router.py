@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Query, status
 from loguru import logger
 
 from cruds import customer_crud
@@ -15,11 +17,15 @@ customer_router = APIRouter(prefix="/customers", tags=["Customers"])
 
 @customer_router.get("/", response_model=list[CustomerSchema])
 async def read_customers(
-    db: GetDBDep, current_user: GetCurrentAdminUserDep
+    db: GetDBDep,
+    current_user: GetCurrentAdminUserDep,
+    is_active: Optional[bool] = Query(
+        None, description="Filter customers by their active status. Defaults to None."
+    ),
 ) -> list[CustomerSchema]:
     """Reads and returns all customers from the database."""
     try:
-        customers = customer_crud.get_customers(db)
+        customers = customer_crud.get_customers(db, is_active=is_active)
         return customers
     except DatabaseError as e:
         raise HTTPException(

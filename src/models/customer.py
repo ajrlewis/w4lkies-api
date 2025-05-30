@@ -17,3 +17,6 @@ class Customer(TimestampMixin, Base):
     emergency_contact_phone = Column(String)
     signed_up_on = Column(DateTime)
     is_active = Column(Boolean)
+
+    # dogs = relationship("Dog", backref="customers")
+    dogs = relationship("Dog", backref="customer")

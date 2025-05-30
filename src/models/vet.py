@@ -13,4 +13,4 @@ class Vet(TimestampMixin, Base):
     address = Column(String(255), nullable=False)
     phone = Column(String(255), nullable=False)
 
-    dogs = relationship("Dog", backref="vet", lazy=True)
+    dogs = relationship("Dog", backref="vet")

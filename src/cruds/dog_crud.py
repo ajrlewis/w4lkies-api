@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from database import SessionLocal
 from exceptions import NotFoundError, DatabaseError
-from models import User, Dog
+from models import User, Customer, Dog, Vet
 from schemas.dog_schema import DogUpdateSchema, DogCreateSchema
 
 
@@ -44,10 +44,26 @@ def update_dog_by_id(
 
     if name := dog_data.name:
         dog.name = name
-    if phone := dog_data.phone:
-        dog.phone = phone
-    if address := dog_data.address:
-        dog.address = address
+    if date_of_birth := dog_data.date_of_birth:
+        dog.date_of_birth = date_of_birth
+    if is_allowed_treats := dog_data.is_allowed_treats:
+        dog.is_allowed_treats = is_allowed_treats
+    if is_allowed_off_the_lead := dog_data.is_allowed_off_the_lead:
+        dog.is_allowed_off_the_lead = is_allowed_off_the_lead
+    if is_allowed_on_social_media := dog_data.is_allowed_on_social_media:
+        dog.is_allowed_on_social_media = is_allowed_on_social_media
+    if is_neutered_or_spayed := dog_data.is_neutered_or_spayed:
+        dog.is_neutered_or_spayed = is_neutered_or_spayed
+    if behavioral_issues := dog_data.behavioral_issues:
+        dog.behavioral_issues = behavioral_issues
+    if medical_needs := dog_data.medical_needs:
+        dog.medical_needs = medical_needs
+    if breed := dog_data.breed:
+        dog.breed = breed
+    if customer_id := dog_data.customer_id:
+        dog.customer_id = customer_id
+    if vet_id := dog_data.vet_id:
+        dog.vet_id = vet_id
 
     try:
         dog.updated_by = current_user.user_id
@@ -62,7 +78,19 @@ def update_dog_by_id(
 
 def add_dog(db: SessionLocal, current_user: User, dog_data: DogCreateSchema) -> Dog:
     logger.debug(f"{dog_data = }")
-    dog = Dog(name=dog_data.name, address=dog_data.address, phone=dog_data.phone)
+    dog = Dog(
+        name=dog_data.name,
+        date_of_birth=dog_data.date_of_birth,
+        is_allowed_treats=dog_data.is_allowed_treats,
+        is_allowed_off_the_lead=dog_data.is_allowed_off_the_lead,
+        is_allowed_on_social_media=dog_data.is_allowed_on_social_media,
+        is_neutered_or_spayed=dog_data.is_neutered_or_spayed,
+        behavioral_issues=dog_data.behavioral_issues,
+        medical_needs=dog_data.medical_needs,
+        breed=dog_data.breed,
+        customer_id=dog_data.customer_id,
+        vet_id=dog_data.vet_id,
+    )
     try:
         dog.created_by = current_user.user_id
         db.add(dog)

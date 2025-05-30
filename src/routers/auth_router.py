@@ -10,7 +10,7 @@ from config import settings
 from dependencies import GetDBDep, OAuth2FormDataDep
 from emails import send_email
 from services import auth_service
-from schemas.token_schema import Token, TokenData
+from schemas.token_schema import Token
 from templates import render_template
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -33,25 +33,32 @@ async def login_for_access_token(
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth_service.create_access_token(
-        data={"sub": user.name}, expires_delta=access_token_expires
+        data={"sub": user.name},
+        expires_delta=access_token_expires,
     )
 
     try:
-        content = render_template(
-            "emails/user_sign_in.html", {"user": user, "request": request}
-        )
-        background_tasks.add_task(
-            send_email,
-            to=[user.email],
-            subject="⚠️❗ W4lkies Sign In ❗⚠️",
-            content=content,
-        )
-        logger.debug("User sign-in notification sent in the background")
+        if user.name not in [
+            "Active User",
+            "Active Admin",
+            "Inactive User",
+            "Inactive Admin",
+        ]:
+            content = render_template(
+                "emails/user_sign_in.html", {"user": user, "request": request}
+            )
+            background_tasks.add_task(
+                send_email,
+                to=[user.email],
+                subject="⚠️❗ W4lkies Sign In ❗⚠️",
+                content=content,
+            )
+            logger.debug("User sign-in notification sent in the background")
     except Exception as e:
         logger.error(f"Error processing contact form: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-
-    return Token(access_token=access_token, token_type="bearer")
+    scopes = ["admin"] if user.is_admin else ["user"]
+    return Token(access_token=access_token, scopes=scopes, token_type="bearer")

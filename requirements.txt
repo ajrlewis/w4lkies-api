@@ -6,3 +6,4 @@ bcrypt
 PyJWT
 loguru
 jinja2
+reportlab

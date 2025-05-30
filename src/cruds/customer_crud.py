@@ -11,8 +11,10 @@ from models import User, Customer
 from schemas.customer_schema import CustomerUpdateSchema, CustomerCreateSchema
 
 
-def get_customers(db: SessionLocal) -> list[Customer]:
+def get_customers(db: SessionLocal, is_active: Optional[bool] = None) -> list[Customer]:
     query = db.query(Customer)
+    if is_active is not None:
+        query = query.filter_by(is_active=is_active)
     query = query.order_by(Customer.name)
     customers = query.all()
     return customers
