@@ -100,9 +100,10 @@ async def debug_middleware(request: Request, call_next):
     # Log the request body
     if request.method in ["POST", "PUT", "PATCH"]:
         body = await request.body()
-        logger.debug("Request Body:")
+        logger.debug(f"Request Body: {body}")
         try:
-            logger.debug(json.dumps(json.loads(body), indent=2))
+            data = json.loads(body)
+            logger.debug(data)
         except json.JSONDecodeError:
             logger.debug(body.decode("utf-8"))
 
