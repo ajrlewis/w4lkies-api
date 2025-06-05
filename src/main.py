@@ -14,6 +14,7 @@ from routers import (
     booking_router,
     invoice_router,
     expense_router,
+    # income_statement_router,
 )
 
 logger.debug("Creating application ...")
@@ -69,7 +70,49 @@ from routers import contact_us_router, customer_sign_up_router
 app.include_router(contact_us_router)
 app.include_router(customer_sign_up_router)
 
+# from routers import database_router
+
+# app.include_router(database_router)
+
 
 @app.get("/")
 async def read_root():
     return {"message": "Hello World!"}
+
+
+import json
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+
+@app.middleware("http")
+async def debug_middleware(request: Request, call_next):
+    # Log the request method and URL
+    logger.debug(f"Request Method: {request.method}")
+    logger.debug(f"Request URL: {request.url}")
+
+    # Log the request headers
+    logger.debug("Request Headers:")
+    for key, value in request.headers.items():
+        logger.debug(f"  {key}: {value}")
+
+    # Log the request body
+    if request.method in ["POST", "PUT", "PATCH"]:
+        body = await request.body()
+        logger.debug("Request Body:")
+        try:
+            logger.debug(json.dumps(json.loads(body), indent=2))
+        except json.JSONDecodeError:
+            logger.debug(body.decode("utf-8"))
+
+    # Continue with the next middleware/route handler
+    response = await call_next(request)
+
+    # Log the response status code and headers
+    logger.debug(f"Response Status Code: {response.status_code}")
+    logger.debug("Response Headers:")
+    for key, value in response.headers.items():
+        logger.debug(f"  {key}: {value}")
+
+    return response
