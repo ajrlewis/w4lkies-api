@@ -1,12 +1,14 @@
+from datetime import date, timedelta
 from typing import Optional
 
 from loguru import logger
-from sqlalchemy import distinct
+from sqlalchemy import distinct, func, and_
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import aliased
 
 from database import SessionLocal
 from exceptions import NotFoundError, DatabaseError
-from models import User, Service
+from models import User, Service, Booking
 from schemas.service_schema import ServiceUpdateSchema, ServiceCreateSchema
 
 
@@ -15,14 +17,43 @@ def get_services(
     is_active: Optional[bool] = None,
     is_publicly_offered: Optional[bool] = None,
 ) -> list[Service]:
-    query = db.query(Service)
+    one_year_ago = date.today() - timedelta(days=365)
+    booking_count = func.count(Booking.booking_id).label("booking_count")
+
+    query = (
+        db.query(Service)
+        .outerjoin(
+            Booking,
+            and_(
+                Booking.service_id == Service.service_id, Booking.date >= one_year_ago
+            ),
+        )
+        .group_by(Service.service_id)
+        .order_by(booking_count.desc())
+    )
+
     if is_active is not None:
-        query = query.filter_by(is_active=is_active)
+        query = query.filter(Service.is_active == is_active)
     if is_publicly_offered is not None:
-        query = query.filter_by(is_publicly_offered=is_publicly_offered)
-    query = query.order_by(Service.name)
+        query = query.filter(Service.is_publicly_offered == is_publicly_offered)
+
     services = query.all()
     return services
+
+
+# def get_services(
+#     db: SessionLocal,
+#     is_active: Optional[bool] = None,
+#     is_publicly_offered: Optional[bool] = None,
+# ) -> list[Service]:
+#     query = db.query(Service)
+#     if is_active is not None:
+#         query = query.filter_by(is_active=is_active)
+#     if is_publicly_offered is not None:
+#         query = query.filter_by(is_publicly_offered=is_publicly_offered)
+#     query = query.order_by(Service.name)
+#     services = query.all()
+#     return services
 
 
 def get_service_by_id(db: SessionLocal, service_id: int) -> Service:
