@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, create_model
 
 from schemas.customer_schema import CustomerBaseSchema
 from schemas.vet_schema import VetBaseSchema
@@ -23,8 +23,18 @@ class DogBaseSchema(BaseModel):
     vet: VetBaseSchema
 
 
-class DogCreateSchema(DogBaseSchema):
-    pass
+fields = {
+    field: DogBaseSchema.__annotations__[field]
+    for field in DogBaseSchema.__annotations__
+    if field not in {"customer_id", "vet_id", "customer", "vet"}
+}
+fields["customer_id"] = int
+fields["vet_id"] = int
+DogCreateSchema = create_model("DogCreateSchema", **fields)
+
+
+# class DogCreateSchema(DogBaseSchema):
+#     pass
 
 
 class DogUpdateSchema(BaseModel):
