@@ -1,21 +1,47 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 from loguru import logger
-from sqlalchemy import distinct
+from sqlalchemy import distinct, func, and_
 from sqlalchemy.exc import SQLAlchemyError
 
 from database import SessionLocal
 from exceptions import NotFoundError, DatabaseError
-from models import User, Customer
+from models import User, Booking, Customer
 from schemas.customer_schema import CustomerUpdateSchema, CustomerCreateSchema
 
 
+# def get_customers(db: SessionLocal, is_active: Optional[bool] = None) -> list[Customer]:
+#     query = db.query(Customer)
+#     if is_active is not None:
+#         query = query.filter_by(is_active=is_active)
+#     query = query.order_by(Customer.name)
+#     customers = query.all()
+#     return customers
+
+
 def get_customers(db: SessionLocal, is_active: Optional[bool] = None) -> list[Customer]:
-    query = db.query(Customer)
+    date_min = date.today() - timedelta(days=28 * 2)
+    booking_count = func.count(Booking.booking_id).label("booking_count")
+
+    # Base query with join and booking date filter
+    query = (
+        db.query(Customer)
+        .outerjoin(
+            Booking,
+            and_(
+                Booking.customer_id == Customer.customer_id,
+                Booking.date >= date_min,
+            ),
+        )
+        .group_by(Customer.customer_id)
+        .order_by(booking_count.desc(), Customer.name.asc())
+    )
+
+    # Apply is_active filter if provided
     if is_active is not None:
-        query = query.filter_by(is_active=is_active)
-    query = query.order_by(Customer.name)
+        query = query.filter(Customer.is_active == is_active)
+
     customers = query.all()
     return customers
 
