@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import hashlib
 from typing import Optional
 
 from loguru import logger
@@ -13,11 +14,16 @@ from schemas.invoice_schema import InvoiceGenerateSchema
 from services import invoice_download_service
 
 
-def get_invoices(db: SessionLocal, is_paid: Optional[bool] = None) -> list[Invoice]:
+def get_invoices(
+    db: SessionLocal,
+    date_min: Optional[str] = None,
+    date_max: Optional[str] = None,
+) -> list[Invoice]:
     query = db.query(Invoice)
-    # if is_paid is not None:
-    #     date_paid == None
-    #     query = query.filter()
+    if date_min:
+        query = query.filter(Invoice.date_issued >= date_min)
+    if date_max:
+        query = query.filter(Invoice.date_issued <= date_max)
     query = query.order_by(desc(Invoice.date_issued))
     invoices = query.all()
     return invoices
@@ -80,7 +86,7 @@ def add_invoice(db: SessionLocal, current_user: User, invoice_data: dict) -> Inv
         invoice.created_by = current_user.user_id
         db.add(invoice)
         db.commit()
-        return dog
+        return invoice
     except SQLAlchemyError as e:
         detail = f"Error adding invoice: {e}"
         logger.error(detail)
@@ -91,8 +97,8 @@ def add_invoice(db: SessionLocal, current_user: User, invoice_data: dict) -> Inv
 def generate_invoice_data(
     db: SessionLocal, customer_id: int, date_start: str, date_end: str
 ) -> dict:
-    invoice_reference_prefix = "W4LKIES"
-    invoice_days_due = 7
+    reference_prefix = "W4LKIES"
+    days_due = 7
 
     # Get unique reference for invoice
     reference_hash = (
@@ -100,11 +106,16 @@ def generate_invoice_data(
         .hexdigest()[:8]
         .upper()
     )
-    invoice_reference = f"{invoice_reference_prefix}-{invoice_reference_hash}"
+    reference = f"{reference_prefix}-{reference_hash}"
 
     # Get the customer bookings.
     bookings = booking_crud.get_bookings(
-        date_min=date_start, date_max=date_end, customer_id=customer_id
+        db=db,
+        pagination_params=None,
+        response=None,
+        date_min=date_start,
+        date_max=date_end,
+        customer_id=customer_id,
     )
 
     # Get the total price of the bookings
@@ -119,8 +130,8 @@ def generate_invoice_data(
         "reference": reference,
         "date_start": date_start,
         "date_end": date_end,
-        "date_issued": datetime.datetime.now(),
-        "date_due": datetime.datetime.now() + datetime.timedelta(days=days_due),
+        "date_issued": datetime.now(),
+        "date_due": datetime.now() + timedelta(days=days_due),
         "price_subtotal": price_subtotal,
         "price_discount": price_discount,
         "price_total": price_total,
@@ -131,18 +142,16 @@ def generate_invoice_data(
     return invoice_data
 
 
-def generate_invoice(invoice_data: dict) -> Optional[Invoice]:
-    customer_id = invoice_data["customer_id"]
-    date_start = invoice_data["date_start"]
-    date_end = invoice_data["date_end"]
-
-    new_invoice_data = generate_invoice_data(customer_id, date_start, date_end)
-
-    created_by = invoice_data["created_by"]
-    new_invoice_data["created_by"] = created_by
-
-    new_invoice = add_invoice(new_invoice_data)
+def generate_invoice(
+    db: SessionLocal,
+    current_user: User,
+    customer_id: int,
+    date_start: datetime,
+    date_end: datetime,
+) -> Optional[Invoice]:
+    new_invoice_data = generate_invoice_data(db, customer_id, date_start, date_end)
+    logger.debug(f"{new_invoice_data = }")
+    new_invoice = add_invoice(db, current_user, new_invoice_data)
     logger.info(f"{new_invoice = }")
     logger.info(f"{new_invoice.bookings = }")
-
     return new_invoice

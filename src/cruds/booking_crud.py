@@ -38,8 +38,8 @@ def get_booking_time_choices(
 
 def get_bookings(
     db: SessionLocal,
-    pagination_params: PaginationParamsSchema,
-    response: Response,
+    pagination_params: Optional[PaginationParamsSchema] = None,
+    response: Optional[Response] = None,
     user_id: Optional[int] = None,
     customer_id: Optional[int] = None,
     date_min: Optional[str] = None,
@@ -57,7 +57,10 @@ def get_bookings(
         query = query.filter(Booking.date < date_max)
     if order_by:
         query = query.order_by(*order_by)
-    results = paginate(query, pagination_params, response)
+    if pagination_params is not None and response is not None:
+        results = paginate(query, pagination_params, response)
+    else:
+        results = query.all()
     return results
 
 

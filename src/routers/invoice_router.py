@@ -8,7 +8,11 @@ from loguru import logger
 from cruds import invoice_crud
 from dependencies import GetDBDep, GetCurrentAdminUserDep
 from exceptions import DatabaseError, NotFoundError
-from schemas.invoice_schema import InvoiceBaseSchema, InvoiceSchema
+from schemas.invoice_schema import (
+    InvoiceBaseSchema,
+    InvoiceSchema,
+    InvoiceGenerateSchema,
+)
 
 invoice_router = APIRouter(prefix="/invoices", tags=["Invoices"])
 
@@ -37,6 +41,35 @@ async def read_invoice(
     """Reads and returns a specific invoice from the database."""
     try:
         invoice = invoice_crud.get_invoice_by_id(db, invoice_id)
+        return invoice
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except DatabaseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+"""
+select b.date, c.customer_id
+from booking b
+left join customer c
+on b.customer_id = c.customer_id
+where b.date > '2025-06-01';
+"""
+
+
+@invoice_router.post("/generate")
+async def generate_invoice(
+    db: GetDBDep,
+    current_user: GetCurrentAdminUserDep,
+    data: InvoiceGenerateSchema,
+):
+    """Generates an invoice for a specific customer over a date range."""
+    try:
+        invoice = invoice_crud.generate_invoice(
+            db, current_user, data.customer_id, data.date_start, data.date_end
+        )
         return invoice
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

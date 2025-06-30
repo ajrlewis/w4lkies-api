@@ -38,8 +38,8 @@ class InvoiceCreateSchema(BaseModel):
 
 
 class InvoiceGenerateSchema(BaseModel):
-    date_from: datetime
-    date_to: datetime
+    date_start: datetime
+    date_end: datetime
     customer_id: int
 
 
