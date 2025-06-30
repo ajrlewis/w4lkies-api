@@ -49,7 +49,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "X-Pagination"],
-    expose_headers=["X-Pagination"],
+    expose_headers=["Content-Disposition", "X-Pagination"],
 )
 
 
@@ -63,6 +63,7 @@ app.include_router(service_router)
 app.include_router(booking_router)
 app.include_router(invoice_router)
 app.include_router(expense_router)
+# app.include_router(income_statement_router)
 
 
 from routers import contact_us_router, customer_sign_up_router
@@ -80,40 +81,40 @@ async def read_root():
     return {"message": "Hello World!"}
 
 
-import json
+# import json
 
-from fastapi import Request
-from fastapi.responses import JSONResponse
+# from fastapi import Request
+# from fastapi.responses import JSONResponse
 
 
-@app.middleware("http")
-async def debug_middleware(request: Request, call_next):
-    # Log the request method and URL
-    logger.debug(f"Request Method: {request.method}")
-    logger.debug(f"Request URL: {request.url}")
+# @app.middleware("http")
+# async def debug_middleware(request: Request, call_next):
+#     # Log the request method and URL
+#     logger.debug(f"Request Method: {request.method}")
+#     logger.debug(f"Request URL: {request.url}")
 
-    # Log the request headers
-    logger.debug("Request Headers:")
-    for key, value in request.headers.items():
-        logger.debug(f"  {key}: {value}")
+#     # Log the request headers
+#     logger.debug("Request Headers:")
+#     for key, value in request.headers.items():
+#         logger.debug(f"  {key}: {value}")
 
-    # Log the request body
-    if request.method in ["POST", "PUT", "PATCH"]:
-        body = await request.body()
-        logger.debug(f"Request Body: {body}")
-        try:
-            data = json.loads(body)
-            logger.debug(data)
-        except json.JSONDecodeError:
-            logger.debug(body.decode("utf-8"))
+#     # Log the request body
+#     if request.method in ["POST", "PUT", "PATCH"]:
+#         body = await request.body()
+#         logger.debug(f"Request Body: {body}")
+#         try:
+#             data = json.loads(body)
+#             logger.debug(data)
+#         except json.JSONDecodeError:
+#             logger.debug(body.decode("utf-8"))
 
-    # Continue with the next middleware/route handler
-    response = await call_next(request)
+#     # Continue with the next middleware/route handler
+#     response = await call_next(request)
 
-    # Log the response status code and headers
-    logger.debug(f"Response Status Code: {response.status_code}")
-    logger.debug("Response Headers:")
-    for key, value in response.headers.items():
-        logger.debug(f"  {key}: {value}")
+#     # Log the response status code and headers
+#     logger.debug(f"Response Status Code: {response.status_code}")
+#     logger.debug("Response Headers:")
+#     for key, value in response.headers.items():
+#         logger.debug(f"  {key}: {value}")
 
-    return response
+#     return response
