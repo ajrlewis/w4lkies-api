@@ -20,7 +20,6 @@ def get_invoices(
     date_max: Optional[str] = None,
 ) -> list[Invoice]:
     query = db.query(Invoice)
-    logger.debug(f"{query = }")
     if date_min:
         logger.debug(f"{date_min = }")
         query = query.filter(Invoice.date_issued >= date_min)
@@ -28,9 +27,9 @@ def get_invoices(
         logger.debug(f"{date_max = }")
         query = query.filter(Invoice.date_issued <= date_max)
     query = query.order_by(desc(Invoice.date_issued))
-    logger.debug(f"{query = }")
     invoices = query.all()
-    logger.debug(f"{invoices = }")
+    invoices = invoices[:50]
+    logger.debug(f"{len(invoices) = }")
     return invoices
 
 
